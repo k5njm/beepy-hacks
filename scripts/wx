@@ -1,0 +1,223 @@
+## Source: https://discord.com/channels/1108020055318462606/1124358440337289337/1124880844306272297
+## By TheMediocritist
+
+
+# Default values
+DEFAULT_LOCATION=Palo+Alto
+DEFAULT_UNITS=imperial
+CONFIG_FILE="$HOME/.config/weather.cfg"
+PAGE=0
+
+# Check if the configuration file exists, otherwise create it
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  echo "location=$DEFAULT_LOCATION" > "$CONFIG_FILE"
+  echo "units=$DEFAULT_UNITS" >> "$CONFIG_FILE"
+
+  # Prompt user to overwrite configuration settings
+  echo "Enter location and units (currently $location $units)"
+  read -p " : " new_location new_units
+
+  # Update variables if user provides input
+  if [[ -n $new_location ]]; then
+    location=$new_location
+  fi
+  if [[ -n $new_units ]]; then
+    units=$new_units
+  fi
+fi
+
+# Read the configuration file and populate variables
+if [[ -f "$CONFIG_FILE" ]]; then
+  while IFS='=' read -r key value; do
+    if [[ -n $key && -n $value ]]; then
+      case $key in
+        location) location=$value ;;
+        units) units=$value ;;
+      esac
+    fi
+  done < "$CONFIG_FILE"
+fi
+
+# Clear screen
+clear >$(tty)
+
+
+
+# Update configuration file with new values
+echo "location=$location" > "$CONFIG_FILE"
+echo "units=$units" >> "$CONFIG_FILE"
+
+# Substitute 'u' and 'm' for weather units
+if [[ $units == "imperial" ]]; then
+  units="u"
+elif [[ $units == "metric" ]]; then
+  units="m"
+fi
+
+function reset_buffer() {
+  # Set up a screen buffer
+  screenbuffer=("                 ┌─────────            ──────────┐" \
+                "                 │  ~ Morning ~  │   ~ Noon ~    │" \
+                "                 │               │               │" \
+                "                 │               │               │" \
+                "                 │               │               │" \
+                "                 │               │               │" \
+                "                 │               │               │" \
+                "                 ├───────────────┼───────────────┤" \
+                "                 │ ~ Afternoon ~ │   ~ Night ~   │" \
+                "                 │               │               │" \
+                "                 │               │               │" \
+                "                 │               │               │" \
+                "                 │               │               │" \
+                "                 │               │               │" \
+                "(q=quit, key=pg) └───────────────┴───────────────┘")
+}
+
+# Clear screen
+clear >$(tty)
+
+# Disable cursor
+printf "\033[?25l"
+
+# Disable line wrapping.
+printf '\e[?7l'
+
+# Helper function for padding/trimming string to desired length
+function pad() {
+  local text="$1"
+  local length="$2"
+
+  if [[ ${#text} -gt $length ]]; then
+    printf "%s" "${text:0:$length}"
+  else
+    printf "%-${length}s" "$text"
+  fi
+}
+
+function insertString() {
+  local string=$1
+  local row=$2
+  local col=$3
+  local tmp_line=${screenbuffer[$row]}
+
+  # Calculate the length of the string
+  local string_length=${#string}
+  local col_end=$((col + string_length))
+
+  # Insert the string into the buffer at the specified position
+  tmp_line="${tmp_line:0:$col}$string${tmp_line:$col_end}"
+
+  # Update the screenbuffer array with the modified line
+  screenbuffer[$row]=$tmp_line
+}
+
+# Function to handle key press
+function handleKeyPress() {
+  local key=$1
+  if [[ $key == "q" ]]; then # Exit the script if 'q' is pressed
+
+    # Enable cursor
+    printf "\033[?25h"
+
+    # Enabling line wrapping.
+    printf '\e[?7h'
+
+    clear >$(tty)
+
+    exit 0
+  else
+    # Increment PAGE variable and reset to 1 if it reaches 3
+    ((PAGE++))
+    if ((PAGE > 2)); then
+      PAGE=0
+    fi
+
+  fi
+}
+
+# Fetch data from wttr.in
+curl wttr.in/$location?T?$units --silent --max-time 3 > /tmp/weather
+
+readarray aWeather < /tmp/weather
+rm -f /tmp/weather
+
+# Strip newlines from data
+weather_data=()
+for line in "${aWeather[@]}"; do
+  weather_data+=("${line%$'\n'}")
+done
+
+location="${weather_data[0]:16:21}"
+location="${location//+/' '}"
+
+icon_array=("${weather_data[2]:3:13}" \
+            "${weather_data[3]:3:13}" \
+            "${weather_data[4]:3:13}" \
+            "${weather_data[5]:3:13}" \
+            "${weather_data[6]:3:13}")
+
+now_array=("${weather_data[2]:16:13}" \
+           "${weather_data[3]:16:13}" \
+           "${weather_data[4]:16:13}" \
+           "${weather_data[5]:16:13}" \
+           "${weather_data[6]:16:13}")
+
+function fill_data() {
+
+  insertString "$location" 6 3
+
+  for i in $(seq 0 4); do
+      insertString "${icon_array[i]}" $((1+i)) 2
+      insertString "${now_array[i]}" $((8+i)) 2
+  done
+
+  day="${weather_data[8+PAGE*10]:58:10}"
+
+  insertString "$day" $((0)) 28
+
+  am_array=()
+  noon_array=()
+  pm_array=()
+  night_array=()
+
+  for i in $(seq 0 4); do
+    am_array+=(   "${weather_data[11+i+PAGE*10]:16:14}")
+    noon_array+=( "${weather_data[11+i+PAGE*10]:47:14}")
+    pm_array+=(   "${weather_data[11+i+PAGE*10]:78:14}")
+    night_array+=("${weather_data[11+i+PAGE*10]:109:14}")
+  done
+
+  for i in $(seq 0 4); do
+      insertString "${am_array[i]}" $((2+i)) 19
+      insertString "${noon_array[i]}" $((2+i)) 35
+      insertString "${pm_array[i]}" $((9+i)) 19
+      insertString "${night_array[i]}" $((9+i)) 35
+  done
+}
+
+function draw_buffer() {
+
+  # Clear screen
+  clear >$(tty)
+
+  # Print the screenbuffer (last line without newline to prevent scrolling
+  for i in $(seq 0 13); do
+      echo "${screenbuffer[i]}"
+  done
+  echo -n "${screenbuffer[14]}"
+}
+
+# Main loop
+while :
+do
+
+  reset_buffer
+  fill_data
+  draw_buffer
+
+  # Pause until input
+  read -rsn1 key
+  handleKeyPress "$key"
+
+done
+
