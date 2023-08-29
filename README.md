@@ -14,7 +14,8 @@ Matrix
 ### Scripts
 | Description | Link |
 |-------------|------|
-|Weather from `wttr.in` |  https://github.com/k5njm/beepy-hacks/scripts/wx |
+| Weather from `wttr.in` |  https://github.com/k5njm/beepy-hacks/scripts/wx |
+| Zoom Script |  https://github.com/k5njm/beepy-hacks/blob/mainline/zoom.md |
 
 
 ### System Tweaks
