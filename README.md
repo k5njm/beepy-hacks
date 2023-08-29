@@ -22,8 +22,7 @@ Matrix
 | Description | Link |
 |-------------|------|
 | `fbterm` and CJK support on Beepy (both display and input) |  https://gist.github.com/charlestsai1995/54ab65a87e2e063ea25eb3aec4193fe1     |
-| Side button script (WIP) | 
-https://gist.github.com/k5njm/3255187eb9adff5d2cb6c06b94546d51 |
+| Side button script (WIP) | https://gist.github.com/k5njm/3255187eb9adff5d2cb6c06b94546d51 |
 
 
 ### Cases
