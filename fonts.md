@@ -49,17 +49,36 @@ sudo cp fonts/Terminus/PSF/*.gz /usr/share/consolefonts/
 sudo setfont /usr/share/consolefonts/ter-powerline-v12n.psf.gz
 ```
 
-| Normal Font File             | Bold Font File               |
+Normal fonts:
+|Filename                     | Rows x Colums               |
 |-----------------------------|-----------------------------|
-| ter-powerline-v12n.psf.gz   | -                           |
-| ter-powerline-v14n.psf.gz   | ter-powerline-v14b.psf.gz   |
-| ter-powerline-v16n.psf.gz   | ter-powerline-v16b.psf.gz   |
-| ter-powerline-v18n.psf.gz   | ter-powerline-v18b.psf.gz   |
-| ter-powerline-v20n.psf.gz   | ter-powerline-v20b.psf.gz   |
-| ter-powerline-v22n.psf.gz   | ter-powerline-v22b.psf.gz   |
-| ter-powerline-v24n.psf.gz   | ter-powerline-v24b.psf.gz   |
-| ter-powerline-v28n.psf.gz   | ter-powerline-v28b.psf.gz   |
-| ter-powerline-v32n.psf.gz   | ter-powerline-v32b.psf.gz   |
+| ter-powerline-v12n.psf.gz | 66x20 |
+| ter-powerline-v14n.psf.gz | 50x17 |
+| ter-powerline-v16n.psf.gz | 50x15 |
+| ter-powerline-v18n.psf.gz | 40x13 |
+| ter-powerline-v20n.psf.gz | 40x12 |
+| ter-powerline-v22n.psf.gz | 36x10 |
+| ter-powerline-v24n.psf.gz | 33x10 |
+| ter-powerline-v28n.psf.gz | 28x8  |
+| ter-powerline-v32n.psf.gz | 25x7  |
+
+**Bold fonts:**
+|Filename                     | Rows x Colums               |
+|-----------------------------|-----------------------------|
+| ter-powerline-v14b.psf.gz | 50x17 |
+| ter-powerline-v16b.psf.gz | 50x15 |
+| ter-powerline-v18b.psf.gz | 40x13 |
+| ter-powerline-v20b.psf.gz | 40x12 |
+| ter-powerline-v22b.psf.gz | 36x10 |
+| ter-powerline-v24b.psf.gz | 33x10 |
+| ter-powerline-v28b.psf.gz | 28x8  |
+| ter-powerline-v32b.psf.gz | 25x7  |
+
+
+I used this script to cycle fonts and measure size:
+```
+for font in ter-powerline-v*n*; do sudo setfont $font; sleep 3; echo "| $font | `tput cols`x`tput lines` |"; sleep 1; done
+```
 
 ---
 

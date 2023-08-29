@@ -1,0 +1,78 @@
+#!/bin/bash
+
+##################################################################
+# zoom.sh (or renamed to 'zoom')
+# A script to adjust console font size for better readability.
+# It allows for quick zooming in and out of predefined font sizes.
+#
+# Remember to `chmod +x`!
+#
+# Usage: 
+#   ./zoom.sh [in|out]
+#   in  - to zoom in (increase font size)
+#   out - to zoom out (decrease font size)
+#   -h or --help for this help message
+##################################################################
+
+# Help function
+help_message() {
+    echo "Usage: $0 [in|out]"
+    echo "   in  - to zoom in (increase font size)"
+    echo "   out - to zoom out (decrease font size)"
+    echo "   -h or --help for this help message"
+    exit 0
+}
+
+# Check for help argument
+[[ "$1" == "-h" || "$1" == "--help" ]] && help_message
+
+# Define the ordered font list and their sizes
+declare -a fonts=("ter-powerline-v12n.psf.gz" "ter-powerline-v14n.psf.gz" "ter-powerline-v18n.psf.gz" "ter-powerline-v22n.psf.gz" "ter-powerline-v28n.psf.gz" "ter-powerline-v32n.psf.gz")
+
+# Check if all required files exist
+for font in "${fonts[@]}"; do
+    if [[ ! -f "/usr/share/consolefonts/$font" ]]; then
+        echo "Error: Required font $font is missing from /usr/share/consolefonts/"
+        echo "Please follow the setup instructions at https://github.com/k5njm/beepy-hacks/blob/mainline/fonts.md first."
+        exit 1
+    fi
+done
+
+
+if [[ -f /etc/default/console-setup ]] && grep -q '^FONT=' /etc/default/console-setup; then
+    default_font=$(grep '^FONT=' /etc/default/console-setup | cut -d'=' -f2)
+else
+    default_font="ter-powerline-v14n.psf.gz"
+fi
+
+if [[ -f ~/.zoomfont ]]; then
+    current_font=$(<~/.zoomfont)
+else
+    current_font=default_font
+fi
+
+# Get the index of the current font in the list
+font_index=-1
+for i in "${!fonts[@]}"; do
+    if [[ "${fonts[$i]}" == "$current_font" ]]; then
+        font_index=$i
+        break
+    fi
+done
+
+# Adjust the index based on the script argument
+if [[ $1 == "in" ]] && [[ $font_index -lt ${#fonts[@]}-1 ]]; then
+    ((font_index++))
+elif [[ $1 == "out" ]] && [[ $font_index -gt 0 ]]; then
+    ((font_index--))
+else
+    sudo setfont /usr/share/consolefonts/${default_font}
+    echo ${default_font} > ~/.zoomfont
+    exit
+fi
+
+# Activate the selected font
+sudo setfont /usr/share/consolefonts/${fonts[$font_index]}
+
+# Write the font name to ~/.zoomfont
+echo ${fonts[$font_index]} > ~/.zoomfont
