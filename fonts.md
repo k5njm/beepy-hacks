@@ -111,6 +111,11 @@ To persist a font set by `setfont` across reboots, you'll typically need to conf
    ```
 
 After rebooting, the console should use the font you've specified.
+
+font previews: 
+```bash
+ls /usr/share/consolefonts/*.* | sudo fzf --preview="setfont {}; echo the slow box jumped over the electric blue dog" --preview-window=up --keep-right
+```
 ---
 
 ## Terminus Font Screenshots
