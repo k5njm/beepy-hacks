@@ -31,8 +31,17 @@ battery_led () {
   if [ "$UID" -eq 0 -o "$EUID" -eq 0 ]; then
     input=$1
     value=${input::-1}
-    red=$(((0-$value+100)/10))
-    green=$(((100-$value)/10))
+    red=$(((100-$value)/10))
+    if [ $value -gt 30 ]; then
+      green=$((10-((100-$value)/10)))
+    elif [ $value -gt 10 ]; then
+      green=1
+    else
+      green=0
+      red=25
+      led_control 0
+      sleep 1
+    fi
     led_control 1 $red $green 0
   fi
 }
