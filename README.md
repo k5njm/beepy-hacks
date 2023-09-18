@@ -11,6 +11,9 @@ Email
 Matrix
 - gomuks: https://discord.com/channels/1108020055318462606/1129925312512278558
 
+Stocks:
+- tstock: https://github.com/Gbox4/tstock
+
 ### Scripts
 | Description | Link |
 |-------------|------|
